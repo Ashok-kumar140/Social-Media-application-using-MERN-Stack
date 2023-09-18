@@ -1,7 +1,8 @@
 import User from "../models/user";
+import Post from "../models/post";
 import { hashPassword, comparePassword } from "../helpers/auth";
 import jwt from 'jsonwebtoken';
-
+import { nanoid } from 'nanoid';
 
 import crypto from 'crypto';
 import nodemailer from 'nodemailer';
@@ -32,7 +33,7 @@ export const register = async (req, res) => {
     // HAshing the password
     const hashedPassword = await hashPassword(password);
 
-    const user = new User({ name, email, password: hashedPassword, emailToken: crypto.randomBytes(32).toString("hex") });
+    const user = new User({ name, email, password: hashedPassword, emailToken: crypto.randomBytes(32).toString("hex"), username: nanoid(15) });
     // sending mail
 
     // const token = await new Token({
@@ -197,7 +198,7 @@ export const login = async (req, res) => {
         res.json({
             token,
             user
-        })
+        });
     } catch (err) {
         console.log(err)
         return res.status(400).send("Error.Try again.")
@@ -238,7 +239,7 @@ export const sendLink = async (req, res) => {
         }
 
         // token generate for reset password
-        const token = jwt.sign({ _id: userfind._id }, process.env.JWT_SECRET, {
+        const token = jwt.sign({ _id: userfind._id }, process.env.JWT_SECRET_PASS, {
             expiresIn: "1200s"
         });
 
@@ -302,7 +303,7 @@ export const resetPassword = async (req, res) => {
     try {
         const validuser = await User.findOne({ _id: _id, passwordToken: passwordToken });
         //  console.log(validuser)
-        const verifyToken = jwt.verify(passwordToken, process.env.JWT_SECRET);
+        const verifyToken = jwt.verify(passwordToken, process.env.JWT_SECRET_PASS);
 
         if (validuser && verifyToken._id) {
             const newpassword = await hashPassword(newPassword);
@@ -321,6 +322,170 @@ export const resetPassword = async (req, res) => {
             });
 
         }
+    } catch (err) {
+        console.log(err);
+    }
+};
+
+export const profileUpdate = async (req, res) => {
+    try {
+
+        const data = {};
+        if (req.body.username) {
+            data.username = req.body.username;
+        }
+        if (req.body.about) {
+            data.about = req.body.about;
+        }
+        if (req.body.gender) {
+            data.gender = req.body.gender;
+        }
+        if (req.body.name) {
+            data.name = req.body.name;
+        }
+        if (req.body.image) {
+            data.image = req.body.image;
+        }
+
+        let user = await User.findByIdAndUpdate(req.auth._id, data, { new: true });
+        user.password = undefined;
+        res.json(user);
+    } catch (err) {
+        if (err.code == 11000) {
+            return res.json({ error: "This username is already taken" })
+        }
+        console.log(err);
+    }
+};
+
+export const findPeople = async (req, res) => {
+
+    try {
+
+        const user = await User.findById(req.auth._id);
+        // user following list
+        let following = user.following;
+
+        following.push(user._id);
+
+        const people = await User.find({ _id: { $nin: following } }).limit(10);
+
+        res.json(people);
+
+
+    } catch (err) {
+        console.log(err);
+    }
+};
+
+export const addFollower = async (req, res, next) => {
+
+    try {
+        const user = await User.findByIdAndUpdate(req.body._id, {
+            $addToSet: { followers: req.auth._id },
+        });
+        next();
+
+    } catch (err) {
+        console.log(err)
+    }
+
+}
+
+export const userFollow = async (req, res) => {
+
+    try {
+        const user = await User.findByIdAndUpdate(req.auth._id, {
+            $addToSet: { following: req.body._id },
+        },
+            { new: true }).select('-password');
+
+        res.json(user);
+
+    } catch (err) {
+        console.Console.log(err);
+    }
+
+};
+export const removeFollower = async (req, res, next) => {
+
+    try {
+        const user = await User.findByIdAndUpdate(req.body._id, {
+            $pull: { followers: req.auth._id },
+        });
+        next();
+
+    } catch (err) {
+        console.log(err)
+    }
+
+}
+
+export const userUnfollow = async (req, res) => {
+
+    try {
+        const user = await User.findByIdAndUpdate(req.auth._id, {
+            $pull: { following: req.body._id },
+        },
+            { new: true }).select('-password');
+
+        res.json(user);
+
+    } catch (err) {
+        console.Console.log(err);
+    }
+
+};
+
+
+export const userFollowing = async (req, res) => {
+
+    try {
+
+        const user = await User.findById(req.auth._id);
+        const following = await User.find({ _id: user.following });
+        res.json(following);
+
+    } catch (err) {
+        console.log(err);
+    }
+};
+export const userFollowers = async (req, res) => {
+
+    try {
+
+        const user = await User.findById(req.auth._id);
+        const followers = await User.find({ _id: user.followers });
+        res.json(followers);
+
+    } catch (err) {
+        console.log(err);
+    }
+};
+export const searchUser = async (req, res) => {
+    const { query } = req.params;
+    if (!query) return;
+
+    try {
+        const user = await User.find({
+            $or: [
+                { name: { $regex: query, $options: 'i' } },
+                { username: { $regex: query, $options: 'i' } },
+            ]
+        }).select('-password');
+        res.json(user);
+
+    } catch (err) {
+        console.log(err);
+    }
+}
+
+export const getUser = async (req, res) => {
+
+    try {
+        const user = await User.findOne({ username: req.params.username }).select('-password');
+        res.json(user);
+
     } catch (err) {
         console.log(err);
     }

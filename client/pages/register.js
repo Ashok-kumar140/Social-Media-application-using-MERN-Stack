@@ -25,7 +25,7 @@ export default function register() {
         try {
             // console.log({name,email,password,secret});
             setLoading(true);
-            const { data } = await axios.post(`${process.env.NEXT_PUBLIC_API}/register`,
+            const { data } = await axios.post(`/register`,
                 {
                     name,
                     email,

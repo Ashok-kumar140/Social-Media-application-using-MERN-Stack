@@ -20,6 +20,11 @@ const userSchema = new Schema({
         max: 64,
         required: true,
     },
+    username:{
+        type:String,
+        unique:true,
+        required:true
+    },
     verified:{
         type: Boolean,
         default:false
@@ -29,6 +34,10 @@ const userSchema = new Schema({
     },
     passwordToken:{
         type:String,
+    },
+    gender:{
+        type:String
+
     },
     // secret: {
     //     type: String,

@@ -1,5 +1,7 @@
 import mongoose from "mongoose";
 
+
+
 const { ObjectId } = mongoose.Schema;
 
 const postSchema = new mongoose.Schema({
@@ -28,9 +30,9 @@ const postSchema = new mongoose.Schema({
         },
     },
     ]
-}, { timestamps: true });
+},{timestamps:true});
 
-export default mongoose.model("Post", postSchema);
+export default mongoose.model("Post",postSchema);
 
 
 

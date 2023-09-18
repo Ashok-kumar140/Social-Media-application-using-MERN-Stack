@@ -38,6 +38,9 @@ body{
 .active{
     background-color: blue !important;
 }
+.pointer{
+    cursor: pointer;
+}
 /*------------ For small screens------------*/
 @media only screen and (max-width: 768px){
      .box-area{

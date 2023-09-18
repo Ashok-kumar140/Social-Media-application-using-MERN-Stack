@@ -27,25 +27,15 @@
       "static/chunks/main.js",
       "static/chunks/pages/_error.js"
     ],
-    "/forget-password": [
+    "/post/[_id]": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
-      "static/chunks/pages/forget-password.js"
+      "static/chunks/pages/post/[_id].js"
     ],
-    "/login": [
+    "/users/dashboard": [
       "static/chunks/webpack.js",
       "static/chunks/main.js",
-      "static/chunks/pages/login.js"
-    ],
-    "/register": [
-      "static/chunks/webpack.js",
-      "static/chunks/main.js",
-      "static/chunks/pages/register.js"
-    ],
-    "/reset-password/[_id]/[passwordToken]": [
-      "static/chunks/webpack.js",
-      "static/chunks/main.js",
-      "static/chunks/pages/reset-password/[_id]/[passwordToken].js"
+      "static/chunks/pages/users/dashboard.js"
     ]
   },
   "ampFirstPages": []

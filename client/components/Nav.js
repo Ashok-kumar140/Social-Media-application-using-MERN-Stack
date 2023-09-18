@@ -16,7 +16,7 @@ export default function Nav() {
         process.browser && setCurrent(window.location.pathname);
 
     }, [process.browser && window.location.pathname]);
-    
+
 
     const logout = () => {
         window.localStorage.removeItem("auth");
@@ -25,35 +25,42 @@ export default function Nav() {
     }
     return (
         <>
-            <nav className="navbar navbar-expand-lg bg-body-tertiary" data-bs-theme="dark">
-                <div className="container-fluid">
-                    <a className="navbar-brand" href="#">Navbar</a>
-                    <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavAltMarkup" aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
-                        <span className="navbar-toggler-icon" />
+            <nav className='nav d-flex justify-content-between' style={{ backgroundColor: "blue" }}>
+                <Link href="/" className={`nav-link text-light`}>
+                    SOCIAL MEDIA
+                </Link>
+
+                
+
+                {state !== null ? (
+                    <>
+                    <div className="dropdown">
+                    <button
+                        className="btn dropdown-toggle text-light"
+                        type="button"
+                        data-bs-toggle="dropdown"
+                        aria-expanded="false">
+                        {state && state.user && state.user.name}
                     </button>
-                    <div className="collapse navbar-collapse" id="navbarNavAltMarkup">
-                        <div className="navbar-nav">
-                            <Link className={`nav-link ${current==='/' && "active"}`} aria-current="page" href="/">Home</Link>
-                            {state === null ? (
-                                <>
-                                    <Link className={`nav-link ${current==='/login' && "active"}`}  href="/login">Login</Link>
-                                    <Link className={`nav-link ${current==='/register' && "active"}`}  href="/register">Signup</Link>
-
-                                </>
-                            ) : (
-                                <>
-                                    <a className="nav-link" onClick={logout}>Logout</a>
-                                    <Link className={`nav-link ${current==='/users/dashboard' && "active"}`}  href="/users/dashboard">{state && state.user && state.user.name}</Link>
-
-                                </>
-                            )}
-
-
-
-                        </div>
-                    </div>
+                    <ul
+                        className="dropdown-menu">
+                        <Link className={`nav-link dropdown-item   ${current === '/users/profile/update' && "active"}`} href="/users/profile/update">Update Profile</Link>
+                        <Link className={`nav-link dropdown-item   ${current === '/users/dashboard' && "active"}`} href="/users/dashboard">Dashboard</Link>
+                        <a className="nav-link dropdown-item " onClick={logout}>Logout</a>
+                    </ul>
                 </div>
+
+                    </>
+                ) : (
+                    <>
+                        <Link className={`nav-link text-light  ${current === '/login' && "active"}`} href="/login">Login</Link>
+                        <Link className={`nav-link text-light ${current === '/register' && "active"}`} href="/register">Signup</Link>
+
+                    </>
+
+                )}
             </nav>
+
 
 
 

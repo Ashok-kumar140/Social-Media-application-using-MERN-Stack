@@ -27,7 +27,7 @@ export default function login() {
         try {
             // console.log({name,email,password,secret});
             setLoading(true);
-            const { data } = await axios.post(`${process.env.NEXT_PUBLIC_API}/login`,{
+            const { data } = await axios.post(`/login`,{
                 email,password
             });
             setState({
@@ -50,7 +50,7 @@ export default function login() {
                 //saving in local storage
                 window.localStorage.setItem('auth', JSON.stringify(data));
 
-                router.push("/");
+                router.push("/users/dashboard");
             }
 
         } catch (err) {
@@ -60,7 +60,7 @@ export default function login() {
         }
 
     };
-    if(state && state.token) router.push("/")
+    if(state && state.token) router.push("/users/dashboard")
 
     return (
         <div style={{ backgroundColor: "#8091c3" }}>
