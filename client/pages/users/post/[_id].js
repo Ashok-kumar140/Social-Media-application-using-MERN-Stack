@@ -39,7 +39,7 @@ const EditPost = () => {
                 content,
                 image,
             });
-            console.log(data);
+            
             if (data.error) {
                 toast.error(data.error);
 

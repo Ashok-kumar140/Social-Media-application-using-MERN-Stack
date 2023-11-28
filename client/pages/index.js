@@ -1,4 +1,4 @@
-import { React, useContext, useState } from 'react';
+import { React, useContext, useState, useEffect } from 'react';
 import { UserContext } from '../context';
 import ParallaxBG from '../components/cards/parallaxBG';
 import axios from 'axios';
@@ -7,8 +7,10 @@ import Head from "next/head";
 import Link from "next/link";
 import UserRoute from '../components/routes/UserRoute';
 import PostList from '../components/cards/PostList';
+import Search from '../components/Search';
+import People from '../components/cards/People';
 
-export default function Home({ posts }) {
+export default function Home() {
 
     const [state, setState] = useContext(UserContext);
 
@@ -16,7 +18,7 @@ export default function Home({ posts }) {
     const [image, setImage] = useState({});
 
     // for posts
-    const [userposts, setUserPosts] = useState([]);
+    const [posts, setPosts] = useState([]);
     //people
     const [people, setPeople] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -25,11 +27,34 @@ export default function Home({ posts }) {
     const [visible, setVisible] = useState(false);
     const [currentPost, setCurrentPost] = useState({});
 
+
+
+
+    useEffect(() => {
+        if (state && state.token) {
+            newsFeed();
+            findPeople();
+        }
+
+    }, [state && state.token]);
+
+
     const newsFeed = async () => {
         try {
-            const { data } = await axios.get('/news-feed');
+            const { data } = await axios.get('/posts');
             // console.log("User posts=>", data);
-            setUserPosts(data);
+            setPosts(data);
+
+        } catch (err) {
+            console.log(err);
+        }
+    }
+
+    const findPeople = async () => {
+        try {
+
+            const { data } = await axios.get("/find-people");
+            setPeople(data);
 
         } catch (err) {
             console.log(err);
@@ -77,6 +102,50 @@ export default function Home({ posts }) {
 
     };
 
+    const removeComment = async (postId, comment) => {
+        // console.log("postId and comment",postId,comment);
+
+        try {
+
+            let answer = window.confirm("Are you sure to delete comment?");
+            if (!answer) return;
+            const { data } = await axios.put(`/remove-comment`, { postId, comment });
+            console.log("removed comment", data);
+            newsFeed();
+
+        } catch (err) {
+            console.log(err);
+        }
+    };
+
+    const handleFollow = async (user) => {
+
+        try {
+
+            const { data } = await axios.put('/user-follow', { _id: user._id });
+            // console.log("handle follow response=>", data);
+            //update local storage, update user, keep token
+
+            let auth = JSON.parse(localStorage.getItem('auth'));
+            auth.user = data;
+            localStorage.setItem("auth", JSON.stringify(auth));
+
+
+            //update context
+            setState({ ...state, user: data });
+            // update people state
+            let filtered = people.filter((p) => (p._id !== user._id));
+            setPeople(filtered);
+            //rerender the posts in newsfeed
+            newsFeed();
+
+            toast.success(`Following ${user.name}`);
+
+        } catch (err) {
+
+        }
+    };
+
 
     const head = () => (
         <Head>
@@ -88,6 +157,7 @@ export default function Home({ posts }) {
             <meta property="og:site_name" content="SOCIALMEDIA" />
             <meta property="og:url" content="http://socialmedia.com" />
             <meta property="og:image:secure_url" content="http://socilamedia.com/images/default.jpg" />
+            <link rel="icon" type="image/jpg" href="/images/profilepic.jpg"/>
 
         </Head>
     )
@@ -96,13 +166,18 @@ export default function Home({ posts }) {
         <UserRoute>
             {head()}
             <div className="container-fluid">
-                <ParallaxBG url="/images/default.jpg" />
+                <ParallaxBG url="/images/default1.jpeg" />
 
                 <div className="row pt-5" py-3>
                     <div className="col-md-6 offset-1">
                         <PostList posts={posts} handleDelete={handleDelete} handleLike={handleLike}
-                            handleUnlike={handleUnlike} handleComment={handleComment}
+                            handleUnlike={handleUnlike} handleComment={handleComment} removeComment={removeComment}
                         />
+                    </div>
+                    <div className="col-md-4">
+                        <Search />
+                        <div className='suggestion'>Suggested for you</div>
+                        <People people={people} handleFollow={handleFollow} />
                     </div>
                 </div>
             </div>
@@ -110,13 +185,13 @@ export default function Home({ posts }) {
         </UserRoute>
     );
 }
-export async function getServerSideProps() {
-    const { data } = await axios.get('/posts');
+// export async function getServerSideProps() {
+//     const { data } = await axios.get('/posts');
 
-    return {
-        props: {
-            posts: data,
-        }
-    }
-}
+//     return {
+//         props: {
+//             posts: data,
+//         }
+//     }
+// }
 

@@ -6,12 +6,12 @@ import { useRouter } from 'next/router';
 import axios from 'axios';
 import { toast } from 'react-toastify';
 import PostList from '../../components/cards/PostList';
-import People from '../../components/cards/People';
 import Link from 'next/link';
 import { Modal } from 'antd';
 import CommentForm from '../../components/forms/CommentForm';
-import Search from '../../components/Search';
 import ParralaxBG from '../../components/cards/parallaxBG';
+import { Avatar } from 'antd';
+
 
 
 export default function dashboard() {
@@ -42,16 +42,17 @@ export default function dashboard() {
 
     }, [state && state.token]);
 
+
     const newsFeed = async () => {
         try {
             const { data } = await axios.get('/news-feed');
-            // console.log("User posts=>", data);
             setPosts(data);
 
         } catch (err) {
             console.log(err);
         }
-    }
+    };
+
 
     const findPeople = async () => {
         try {
@@ -62,11 +63,11 @@ export default function dashboard() {
         } catch (err) {
             console.log(err);
         }
-    }
+    };
+
 
     const postSubmit = async (e) => {
         e.preventDefault();
-        // console.log("post", content);
 
         try {
             const { data } = await axios.post(`/create-post`, { content, image });
@@ -76,7 +77,7 @@ export default function dashboard() {
                 toast.error(data.error);
             }
             else {
-                fetchUserPosts();
+                newsFeed();
                 toast.success('Post created');
                 setContent("");
                 setImage({})
@@ -87,21 +88,17 @@ export default function dashboard() {
         }
     };
 
+
     const handleImage = async (e) => {
         const file = e.target.files[0];
         let formData = new FormData()
         formData.append('image', file);
         formData.append("content", content);
 
-
-
-        // console.log([...formData]);
         setLoading(true);
 
         try {
             const { data } = await axios.post("/upload-image", formData);
-
-            // console.log("image=>", data);
             setImage({
                 url: data.url,
                 public_id: data.public_id,
@@ -115,7 +112,9 @@ export default function dashboard() {
         }
     };
 
+
     const handleDelete = async (post) => {
+
         try {
             const answer = window.confirm("Are you sure to delete post?");
             if (!answer) return;
@@ -126,14 +125,13 @@ export default function dashboard() {
             console.log(err);
         }
     };
-    const handleLike = async (_id) => {
 
-        // console.log("like this post", _id)
+
+    const handleLike = async (_id) => {
 
         try {
 
             const { data } = await axios.put(`/like-post`, { _id });
-            // console.log("liked data=>", data);
             newsFeed();
 
         } catch (err) {
@@ -143,43 +141,15 @@ export default function dashboard() {
 
     const handleUnlike = async (_id) => {
 
-        // console.log("Unlike this post", _id)
         try {
             const { data } = await axios.put(`/unlike-post`, { _id });
-            // console.log("unliked data=>", data);
+
             newsFeed();
         } catch (err) {
             console.log(err);
         }
     };
 
-    const handleFollow = async (user) => {
-
-        try {
-
-            const { data } = await axios.put('/user-follow', { _id: user._id });
-            // console.log("handle follow response=>", data);
-            //update local storage, update user, keep token
-
-            let auth = JSON.parse(localStorage.getItem('auth'));
-            auth.user = data;
-            localStorage.setItem("auth", JSON.stringify(auth));
-
-
-            //update context
-            setState({ ...state, user: data });
-            // update people state
-            let filtered = people.filter((p) => (p._id !== user._id));
-            setPeople(filtered);
-            //rerender the posts in newsfeed
-            newsFeed();
-
-            toast.success(`Following ${user.name}`);
-
-        } catch (err) {
-
-        }
-    };
 
     const handleComment = async (post) => {
         setCurrentPost(post);
@@ -190,8 +160,7 @@ export default function dashboard() {
 
     const addComment = async (e) => {
         e.preventDefault();
-        // console.log('add coment to this post id=>',currentPost._id)
-        // console.log('comment',comment);
+
         try {
 
             const { data } = await axios.put('/add-comment', {
@@ -207,21 +176,84 @@ export default function dashboard() {
         } catch (err) {
             console.log(err);
         }
-
-
-
     };
-    const removeComment = async () => {
 
-    }
+
+    const imageSource = (user) => {
+        if (user.image) {
+            return user.image.url;
+        }
+        else {
+            return "/images/profile.jpg";
+        }
+    };
+
+
+    const removeComment = async (postId, comment) => {
+
+        try {
+
+            let answer = window.confirm("Are you sure to delete comment?");
+            if (!answer) return;
+            const { data } = await axios.put(`/remove-comment`, { postId, comment });
+            console.log("removed comment", data);
+            newsFeed();
+
+        } catch (err) {
+            console.log(err);
+        }
+    };
+    
 
     return (
         <UserRoute>
             <div className='container-fluid'>
-                <ParralaxBG url="/images/default.jpg">Dashboard Page</ParralaxBG>
+                <ParralaxBG url="/images/default.jpeg">Dashboard Page</ParralaxBG>
+                <div className="row profile"  >
+                    <div className="col-md-3 img-box" >
+                        {
+                            state && state.user && (
+                                <Avatar size={100} src={imageSource(state.user)} />
+                            )
+                        }
+                    </div>
+                    <div className="col-md-4 about-box">
+                        <div>
+                            {state && state.user && state.user.following && state.user.followers && (
+                                <span style={{ display: 'flex', justifyContent: 'space-between' }} >
+                                    <span className="h6" >
+                                        {posts.length} Posts
+                                    </span>{" "}
+                                    <Link className="h6" href={'/users/following'} >
+                                        {state.user.following.length} Following
+                                    </Link>{" "}
+                                    <Link className="h6" href={'/users/followers'} >
+                                        {state.user.followers.length} Followers
+                                    </Link>
+                                </span>)
+
+
+                            }{" "}
+                        </div>
+                        <br></br>
+                        <div>
+                            {
+                                state && state.user && state.user.about && (
+
+                                    <div style={{ whiteSpace: 'pre-line' }}>
+                                        {state.user.about}
+                                    </div>
+
+                                )
+
+
+                            }{" "}
+                        </div>
+                    </div>
+                </div>
                 <br />
 
-                <div className="row" py-3>
+                <div className="row profile" py-3>
                     <div className="col-md-8">
                         <PostForm
                             content={content}
@@ -230,32 +262,16 @@ export default function dashboard() {
                             handleImage={handleImage}
                             loading={loading}
                             image={image}
+
                         />
                         <br />
-                        <PostList posts={posts} handleDelete={handleDelete} handleLike={handleLike}
-                            handleUnlike={handleUnlike} handleComment={handleComment}
+                        <PostList
+                            id='post'
+                            posts={posts} handleDelete={handleDelete} handleLike={handleLike}
+                            handleUnlike={handleUnlike} handleComment={handleComment} removeComment={removeComment}
                         />
                     </div>
 
-
-                    <div className="col-md-4">
-                        <Search />
-                        <br />
-                        {state && state.user && state.user.following && state.user.followers&& (
-                            <span  >
-                                <Link className="h6" href={'/users/following'}style={{margin:"35px"}}>
-                                    {state.user.following.length} Following
-                                </Link>{" "}
-                                <Link className="h6" href={'/users/followers'} >
-                                    {state.user.followers.length} Followers
-                                </Link>
-                            </span>)
-
-
-                        }{" "}
-
-                        <People people={people} handleFollow={handleFollow} />
-                    </div>
                 </div>
                 <Modal visible={visible}
                     onCancel={() => setVisible(false)}

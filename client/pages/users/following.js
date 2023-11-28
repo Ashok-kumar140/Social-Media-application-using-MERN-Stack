@@ -1,10 +1,8 @@
 import { Avatar, List } from 'antd';
-import moment from 'moment';
 import { useRouter } from 'next/router';
 import { UserContext } from '../../context';
 import { useContext, React, useEffect, useState } from 'react';
 import axios from 'axios';
-import { RollbackOutlined } from '@ant-design/icons';
 import Link from 'next/link';
 
 
@@ -23,17 +21,19 @@ const Following = () => {
 
     }, [state && state.token]);
 
+
     const fetchFollowing = async () => {
         try {
 
             const { data } = await axios.get('/user-following');
-            console.log('following list =>', data);
+            
             setPeople(data);
 
         } catch (err) {
             console.log(err);
         }
-    }
+    };
+
 
     const imageSource = (user) => {
         if (user.image) {
@@ -42,16 +42,12 @@ const Following = () => {
         else {
             return "/images/profile.jpg";
         }
+    };
 
 
-    }
-
-    const handleFollow = async () => {
-
-    }
     const handleUnfollow = async (user) => {
         try {
-            const {data} = await axios.put('/user-unfollow',{_id:user._id});
+            const { data } = await axios.put('/user-unfollow', { _id: user._id });
 
             //update local storage
             let auth = JSON.parse(localStorage.getItem('auth'));
@@ -71,10 +67,16 @@ const Following = () => {
             console.log(err);
         }
 
-    }
+    };
+
+
     return (
         <div className='row col-md-6 offset-md-3'>
+            <div style={{paddingTop:'80px',textAlign:'center', marginBottom:'20px'}}>
+                <h5>Following</h5>
+            </div>
             <List
+                className='list'
                 itemLayout='horizontal'
                 dataSource={people}
                 renderItem={(user) => (
@@ -82,7 +84,8 @@ const Following = () => {
                         <List.Item.Meta
                             title={
                                 <div className='d-flex justify-content-between'>
-                                    {user.username} <span className='text-primary pointer' onClick={() => (handleUnfollow(user))}>Unfollow</span>
+                                    <Link href={`/user/${user.username}`}> {user.username} </Link>
+                                    <span className='text-primary pointer' onClick={() => (handleUnfollow(user))}>Unfollow</span>
                                 </div>}
                             avatar={<Avatar src={imageSource(user)} />}
                         />
@@ -90,7 +93,6 @@ const Following = () => {
                     </List.Item>
                 )} />
 
-            <Link href={"/users/dashboard"} className='d-flex justify-content-center pt-5 h5'><RollbackOutlined /></Link>
         </div>
     )
 }

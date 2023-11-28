@@ -9,7 +9,7 @@ import { useRouter } from 'next/router';
 import Link from 'next/link';
 import Post from '../../components/cards/Post';
 
-const PostList = ({ posts, handleDelete, handleLike, handleUnlike, handleComment }) => {
+const PostList = ({ posts, handleDelete, handleLike, handleUnlike, handleComment,removeComment }) => {
 
     const [state] = useContext(UserContext);
 
@@ -36,6 +36,7 @@ const PostList = ({ posts, handleDelete, handleLike, handleUnlike, handleComment
                         handleLike={handleLike}
                         handleUnlike={handleUnlike}
                         handleComment={handleComment}
+                        removeComment={removeComment}
                     />
                 ))
             }

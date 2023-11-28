@@ -57,7 +57,7 @@ export default function register() {
 
 
     return (
-        <div style={{ backgroundColor: "#8091c3" }}>
+        <div style={{ backgroundColor: "#eff0f2" }}>
             <div className="container d-flex justify-content-center align-items-center min-vh-100">
                 {/*--------------------- Login Container ------------------------*/}
                 <div className="row border rounded-5 p-3 bg-white shadow box-area">

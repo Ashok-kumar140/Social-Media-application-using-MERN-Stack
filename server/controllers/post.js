@@ -116,7 +116,7 @@ export const newsFeed = async (req, res) => {
         let following = user.following;
         following.push(req.auth._id);
 
-        const posts = await Post.find({ postedBy: { $in: following } })
+        const posts = await Post.find({ postedBy: { $in: user } })
             .populate('postedBy', '_id name image')
             .populate("comments.postedBy", "_id name image")
             .sort({ createdAt: -1 });
@@ -194,11 +194,28 @@ export const posts = async (req, res) => {
     try {
 
         const posts = await Post.find()
-        .populate('postedBy',"_id name image")
-        .populate('comments.postedBy','_id name image')
-        .sort({createdAt:-1});
+            .populate('postedBy', "_id name image")
+            .populate('comments.postedBy', '_id name image')
+            .sort({ createdAt: -1 });
 
         res.json(posts);
+
+    } catch (err) {
+        console.log(err);
+    }
+};
+
+export const getPost = async (req, res) => {
+
+    try {
+
+        const user = await User.findOne({ username: req.params.username }).select('-password');
+        const userposts = await Post.find({ postedBy:  user._id })
+            .populate('postedBy', '_id name image')
+            .populate("comments.postedBy", "_id name image")
+            .sort({ createdAt: -1 });
+
+        res.json(userposts);
 
     } catch (err) {
         console.log(err);

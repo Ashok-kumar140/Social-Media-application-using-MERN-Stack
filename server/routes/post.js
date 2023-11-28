@@ -2,7 +2,7 @@ import express from 'express';
 import formidable from 'express-formidable';
 
 import { requireSignin,canEditDeletePost } from "../middlewares";
-import { createPost, uploadImage, postByUser,userPost,updatePost,deletePost,newsFeed,unlikePost,likePost,removeComment,addComment,posts } from '../controllers/post';
+import { createPost, uploadImage, postByUser,userPost,updatePost,deletePost,newsFeed,unlikePost,likePost,removeComment,addComment,posts,getPost } from '../controllers/post';
 
 
 const router = express.Router();
@@ -20,6 +20,7 @@ router.put('/unlike-post',requireSignin,unlikePost);
 router.put('/add-comment',requireSignin,addComment);
 router.put('/remove-comment',requireSignin,removeComment);
 router.get('/posts',posts);
+router.get('/user/post/:username',getPost)
 
 
 

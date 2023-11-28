@@ -46,9 +46,7 @@ export default function AuthForm({ name, setName,
                 <div className="form-group mb-3">
                     <button disabled={page === "login" ? (!email || !password) : (!name || !email || !password)} onClick={handleSubmit} className="btn btn-lg btn-primary w-100 fs-6">{loading ? <SyncOutlined spin className='py-1' /> : page === "login" ? ("Sign In") : ("Sign Up")}</button>
                 </div>
-                <div className="form-group mb-3">
-                    <button className="btn btn-lg btn-light w-100 fs-6"><img src="images/googleLogo.png" style={{ width: 20 }} className="me-2" /><small>{page === "login" ? ("Sign In with Google") : ("Sign Up with Google")}</small></button>
-                </div>
+                
                 <div className="row">
                     <small>{page === "login" ? ("Don't have an account?") : ("Already have an account?")}{" "}<a href={`/${page === "login" ? ("register") : ("login")}`}>{page === "login" ? ("Register") : ("Login")}</a></small>
                 </div>

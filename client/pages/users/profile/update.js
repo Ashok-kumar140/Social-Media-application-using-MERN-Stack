@@ -1,12 +1,11 @@
 import { React, useState, useEffect, useContext } from 'react'
 import { toast } from 'react-toastify';
 import axios from 'axios';
-// import { Modal } from 'antd';
-// import Link from 'next/link';
 import { SyncOutlined, CameraOutlined,LoadingOutlined } from '@ant-design/icons';
 import { UserContext } from '../../../context';
 import { useRouter } from 'next/router';
 import { Avatar } from 'antd';
+
 
 export default function register() {
     const [name, setName] = useState("");
@@ -25,7 +24,6 @@ export default function register() {
 
     useEffect(() => {
         if (state && state.user) {
-            // console.log(state.user)
             setUsername(state.user.username);
             setAbout(state.user.about);
             setGender(state.user.gender);
@@ -36,11 +34,12 @@ export default function register() {
 
     }, [state && state.user])
 
+
     const handleSubmit = async (e) => {
         e.preventDefault();
 
         try {
-            // console.log({name,email,password,secret});
+           
             setLoading(true);
             const { data } = await axios.put(`/profile-update`,
                 {
@@ -78,17 +77,12 @@ export default function register() {
         const file = e.target.files[0];
         let formData = new FormData()
         formData.append('image', file);
-        // formData.append("content", content);
-
-
-
-        // console.log([...formData]);
+       
         setLoading(true);
 
         try {
             const { data } = await axios.post("/upload-image", formData);
 
-            // console.log("image=>", data);
             setImage({
                 url: data.url,
                 public_id: data.public_id,
@@ -102,14 +96,11 @@ export default function register() {
         }
     };
 
-    // if (state && state.token) router.push("/")
-
-
     return (
         <div className='container-fluid'>
             <div className="row py-5 bg-default-image text-light">
                 <div className="col text-center">
-                    <h1 >Profile Update Page</h1>
+                    <h1 >Update your profile</h1>
                 </div>
             </div>
             <div className="row py-5">
@@ -148,7 +139,7 @@ export default function register() {
                             <small>
                                 <label className='text-muted'>About</label>
                             </small>
-                            <input value={about} onChange={(e) => setAbout(e.target.value)} type="text" className='form-control' placeholder='Write about yourself' />
+                            <textarea value={about} onChange={(e) => setAbout(e.target.value)} type="textarea" className='form-control' placeholder='Write about yourself' />
                         </div>
                         <div className="form-group p-2">
                             <small>
